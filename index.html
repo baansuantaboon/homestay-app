@@ -65,12 +65,53 @@ label{font-size:13px;font-weight:bold;display:block;margin:0 0 5px}input,select,
   .sig{margin-top:12px!important}.no-print{display:none!important}
 }
 
+
+/* Version 11 — balanced PDF page */
+@page{size:A4 portrait;margin:10mm}
+@media print{
+  html,body{width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:#fff!important}
+  body *{visibility:hidden!important}
+  #document,#document *{visibility:visible!important}
+  #document{
+    display:block!important;
+    position:absolute!important;
+    left:10mm!important;
+    top:10mm!important;
+    width:190mm!important;
+    max-width:190mm!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  #document.doc{
+    box-sizing:border-box!important;
+    width:190mm!important;
+    max-width:190mm!important;
+    min-height:257mm!important;
+    height:auto!important;
+    padding:9mm 10mm!important;
+    margin:0!important;
+    box-shadow:none!important;
+    border:none!important;
+    overflow:hidden!important;
+    zoom:1!important;
+    font-size:12px!important;
+  }
+  .doc-room-table{margin:9px 0!important}
+  .doc-room-table th,.doc-room-table td{padding:5px 4px!important;font-size:10px!important}
+  .stay-card{margin-top:8px!important}
+  .summary-box{margin-top:9px!important}
+  .doc-thanks{margin-top:12px!important;font-size:13px!important}
+  .sig{margin-top:18px!important}
+  .signature-img{display:block!important;visibility:visible!important;opacity:1!important;width:225px!important;height:68px!important;margin:-58px auto -5px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .no-print{display:none!important}
+}
+
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head><body>
-<header><div class="topline"><div class="appbrand"><img src="logo.jpg" alt="Baan Suan Taboon Homestay logo"><div><strong>Baan Suan Taboon Homestay</strong><div style="font-size:12px">Booking Manager · Version 10 · Cloud Sync</div><div id="cloudStatus" class="status warn">Not signed in</div></div></div><button id="signOutBtn" class="hidden">Sign out</button></div></header>
+<header><div class="topline"><div class="appbrand"><img src="logo.jpg" alt="Baan Suan Taboon Homestay logo"><div><strong>Baan Suan Taboon Homestay</strong><div style="font-size:12px">Booking Manager · Version 11 · Cloud Sync</div><div id="cloudStatus" class="status warn">Not signed in</div></div></div><button id="signOutBtn" class="hidden">Sign out</button></div></header>
 <main>
 <section id="loginScreen" class="card">
 <h2 style="margin-top:0">Homestay sign in</h2>
@@ -196,7 +237,19 @@ function renderBookings(){let el=$("bookingList");if(!bookings.length){el.innerH
 window.editBooking=i=>{let b=bookings[i];$("guest").value=b.guest||"";$("phone").value=b.phone||"";$("company").value=b.company||"";$("billingAddress").value=b.billingAddress||"";$("taxId").value=b.taxId||"";$("branch").value=b.branch||"";$("roomRows").innerHTML="";legacyItems(b).forEach(addRoomRow);$("discountType").value=b.discountType||"amount";$("discountValue").value=b.discountValue||0;$("paid").value=b.paid;$("method").value=b.method;$("breakfast").checked=b.breakfast;$("notes").value=b.notes||"";$("editIndex").value=i;$("formTitle").textContent="Edit booking";$("cancelEdit").classList.remove("hidden");updateSummary();show("new");scrollTo(0,0)};
 window.deleteBooking=async i=>{if(confirm("Delete this booking from all synced devices?")){try{await db.collection("bookings").doc(String(bookings[i].id)).delete()}catch(err){alert("Could not delete: "+err.message)}}};
 window.openDoc=async(i,type)=>{let b=bookings[i],key=type==="Invoice"?"invoice":type==="Receipt"?"receipt":"booking",prefix=type==="Invoice"?"INV":type==="Receipt"?"RCV":"BK";if(!b[key+"No"]){b[key+"No"]=counters[key]++;try{await saveBooking(b);await saveCounters()}catch(err){alert("Could not reserve document number: "+err.message);return}}currentDoc={b,type};let titles={"Booking Confirmation":"BOOKING CONFIRMATION","Confirmation":"BOOKING CONFIRMATION","Invoice":"INVOICE / ใบแจ้งหนี้","Receipt":"RECEIPT / ใบเสร็จรับเงิน"};$("docTitle").textContent=titles[type]||type.toUpperCase();$("docNo").textContent="No. "+prefix+String(b[key+"No"]).padStart(4,"0");$("docDate").textContent="Date / วันที่: "+new Date().toLocaleDateString("en-GB");$("docStatus").textContent=(b.total-b.paid)<=0?"PAID / ชำระแล้ว":"UNPAID / ยังไม่ชำระ";$("docStatus").className="doc-status "+((b.total-b.paid)<=0?"paid":"");$("dGuest").textContent=b.guest;$("dPhone").textContent=b.phone?"Phone / โทรศัพท์: "+b.phone:"";let bill=[];if(b.company)bill.push(b.company);if(b.billingAddress)bill.push(b.billingAddress);if(b.taxId)bill.push("Tax ID / เลขประจำตัวผู้เสียภาษี: "+b.taxId+(b.branch?" · Branch / สาขา: "+b.branch:""));else if(b.branch)bill.push("Branch / สาขา: "+b.branch);$("dBilling").textContent=bill.join("\n");$("dBilling").classList.toggle("hidden",!bill.length);$("dCin").textContent=`${b.cin} · after 14:00`;$("dCout").textContent=`${b.cout} · before 12:00`;$("dBreakfast").textContent=b.breakfast?"Included / รวมอาหารเช้า":"Not included / ไม่รวมอาหารเช้า";let items=legacyItems(b),guestTotal=items.reduce((a,x)=>a+Number(x.guests||0),0);$("dGuests").textContent=guestTotal;let n=Number(b.nights||nights(b.cin,b.cout));$("dRoomRows").innerHTML=items.map(x=>`<tr><td>Room ${safe(x.room)} — ${safe(x.roomName)}</td><td>${x.guests}</td><td>${x.cin||b.cin}</td><td>${x.cout||b.cout}</td><td>${money(x.rate)}</td><td>${x.nights||nights(x.cin||b.cin,x.cout||b.cout)}</td><td>${money((x.nights||nights(x.cin||b.cin,x.cout||b.cout))*x.rate)}</td></tr>`).join("");let subtotal=Number(b.subtotal??items.reduce((a,x)=>a+(x.nights||nights(x.cin||b.cin,x.cout||b.cout))*Number(x.rate),0)),discount=Number(b.discount??Math.max(0,subtotal-Number(b.total)));$("dSubtotal").textContent=money(subtotal);$("dDiscount").textContent="−"+money(discount);$("dDiscountLine").classList.toggle("hidden",discount<=0);$("dTotal").textContent=money(b.total);$("dPaid").textContent=money(b.paid);$("dBalance").textContent=money(b.total-b.paid);$("dMethod").textContent=b.method&&b.method!=="Not paid"?"Payment / วิธีชำระ: "+b.method:"";if(b.notes){$("dNotes").textContent="Remarks / หมายเหตุ: "+b.notes;$("dNotes").classList.remove("hidden")}else{$("dNotes").textContent="";$("dNotes").classList.add("hidden")}show("document");scrollTo(0,0)};
-if($("printBtn")) $("printBtn").onclick=()=>window.print();$("closeDoc").onclick=()=>show("bookings");
+if($("printBtn")) $("printBtn").onclick=()=>{
+  if(!currentDoc)return;
+  const b=currentDoc.b, type=currentDoc.type;
+  const key=type==="Invoice"?"invoice":type==="Receipt"?"receipt":"booking";
+  const prefix=type==="Invoice"?"INV":type==="Receipt"?"RCV":"BK";
+  const ref=prefix+String(b[key+"No"]||"").padStart(4,"0");
+  const previousTitle=document.title;
+  document.title=ref;
+  const restore=()=>{document.title=previousTitle;window.removeEventListener("afterprint",restore)};
+  window.addEventListener("afterprint",restore);
+  window.print();
+  setTimeout(()=>{if(document.title===ref)document.title=previousTitle},5000);
+};$("closeDoc").onclick=()=>show("bookings");
 $("shareBtn").onclick=async()=>{if(!currentDoc)return;let b=currentDoc.b,text=`Baan Suan Taboon Homestay\n${currentDoc.type}\nGuest: ${b.guest}\nRoom ${b.room} — ${b.roomName}\n${b.cin} to ${b.cout}\nTotal: ${money(b.total)}\nPaid: ${money(b.paid)}\nBalance: ${money(b.total-b.paid)}`;if(navigator.share){try{await navigator.share({title:"Baan Suan Taboon Homestay",text})}catch(e){}}else{await navigator.clipboard.writeText(text);alert("Details copied.")}};
 function renderCalendar(){let y=calDate.getFullYear(),m=calDate.getMonth(),days=new Date(y,m+1,0).getDate();$("monthTitle").textContent=calDate.toLocaleDateString("en-US",{month:"long",year:"numeric"});let h="<tr><th>Room</th>";for(let d=1;d<=days;d++){let dt=new Date(y,m,d),today=new Date(),cl=dt.toDateString()===today.toDateString()?'today':'';h+=`<th class="${cl}">${d}</th>`}h+="</tr>";for(let r=1;r<=4;r++){h+=`<tr><td>Room ${r}<br><span class="muted">${rooms[r].name}</span></td>`;for(let d=1;d<=days;d++){let ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`,b=bookings.find(x=>x.room==r&&ds>=x.cin&&ds<x.cout);h+=`<td class="${b?'busy':''}" title="${b?safe(b.guest):''}">${b?'●':''}</td>`}h+="</tr>"}$("cal").innerHTML=h}
 $("prevMonth").onclick=()=>{calDate.setMonth(calDate.getMonth()-1);renderCalendar()};$("nextMonth").onclick=()=>{calDate.setMonth(calDate.getMonth()+1);renderCalendar()};
