@@ -1,17 +1,12 @@
-Baan Suan Taboon Homestay Manager — Version 6 Firebase Polished
+Baan Suan Taboon Homestay Manager — Version 7 Final
 
-This version MERGES the working Version 4 Firebase Authentication + Firestore cloud sync
-with the owner's real logo and real homestay photograph and a more polished document design.
+Includes:
+- Firebase cloud sync
+- Multiple rooms in one reservation
+- Optional company / billing address / Tax ID / branch
+- Fixed-amount or percentage discounts
+- Real homestay logo and photograph
+- Proprietor signature automatically printed on customer documents
 
-Upload ALL files in this folder to the existing GitHub repository, replacing the old files:
-- index.html
-- manifest.webmanifest
-- sw.js
-- icon-192.png
-- icon-512.png
-- logo.jpg
-- homestay-photo.jpg
-- README.txt
-
-Existing Firestore bookings are not stored in these files and are not deleted by replacing
-the GitHub site files.
+Upload ALL files in this folder to the existing GitHub repository, replacing the current files.
+Existing Firebase bookings are not deleted by this website update.
