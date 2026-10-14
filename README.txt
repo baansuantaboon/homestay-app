@@ -1,9 +1,10 @@
-Baan Suan Taboon Homestay Manager — Version 9.1
+Baan Suan Taboon Homestay Manager — Version 9.2
 
-Fix:
-- Corrected the Version 9 sign-in failure.
-- The Version 9 JavaScript expected new PDF/Image button IDs while the page still used
-  the old print button ID. This caused JavaScript to stop before attaching the login handler.
-- Added defensive checks so optional export buttons cannot break login initialization.
-- Retains blue signature, one-page A4 printing, PNG export, per-room dates, discounts,
-  billing/tax fields and Firebase cloud sync.
+Fixes based on Android testing:
+- Fixed blank PDF/print preview. The previous print CSS hid the document's parent container.
+  V9.2 keeps the document in the print render tree and hides other content with visibility.
+- Fixed Save as Image error "Cannot read properties of null (reading cloneNode)".
+  The exporter now clones the actual #document element directly.
+- Keeps Version 9.1 login fix.
+- Keeps one-page A4 layout, embedded blue signature, Firebase sync, per-room dates,
+  discounts and billing/tax fields.

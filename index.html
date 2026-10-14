@@ -66,12 +66,27 @@ label{font-size:13px;font-weight:bold;display:block;margin:0 0 5px}input,select,
 }
 .export-canvas-wrap{position:fixed;left:-99999px;top:0;width:794px;background:#fff}
 
+
+/* V9.2 Android print fix */
+@page{size:A4 portrait;margin:5mm}
+@media print{
+  html,body{margin:0!important;padding:0!important;background:#fff!important;width:210mm!important}
+  body *{visibility:hidden!important}
+  #document,#document *{visibility:visible!important}
+  #document{display:block!important;position:absolute!important;left:0!important;top:0!important;width:200mm!important;max-width:200mm!important;margin:0!important;padding:0!important}
+  #document .doc{display:block!important;width:200mm!important;max-width:200mm!important;min-height:0!important;height:auto!important;margin:0!important;padding:5mm 7mm!important;box-sizing:border-box!important;box-shadow:none!important;border:none!important;overflow:hidden!important;zoom:.76!important}
+  #document .no-print{display:none!important}
+  .signature-img{display:block!important;visibility:visible!important;width:190px!important;height:56px!important;object-fit:contain!important;opacity:1!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .doc-room-table{margin:5px 0!important}.doc-room-table th,.doc-room-table td{padding:4px 3px!important;font-size:9px!important}
+  .stay-card{margin-top:5px!important}.summary-box{margin-top:5px!important}.doc-thanks{margin-top:6px!important;font-size:12px!important}.sig{margin-top:4px!important}
+}
+
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head><body>
-<header><div class="topline"><div class="appbrand"><img src="logo.jpg" alt="Baan Suan Taboon Homestay logo"><div><strong>Baan Suan Taboon Homestay</strong><div style="font-size:12px">Booking Manager · Version 9.1 · Cloud Sync</div><div id="cloudStatus" class="status warn">Not signed in</div></div></div><button id="signOutBtn" class="hidden">Sign out</button></div></header>
+<header><div class="topline"><div class="appbrand"><img src="logo.jpg" alt="Baan Suan Taboon Homestay logo"><div><strong>Baan Suan Taboon Homestay</strong><div style="font-size:12px">Booking Manager · Version 9.2 · Cloud Sync</div><div id="cloudStatus" class="status warn">Not signed in</div></div></div><button id="signOutBtn" class="hidden">Sign out</button></div></header>
 <main>
 <section id="loginScreen" class="card">
 <h2 style="margin-top:0">Homestay sign in</h2>
@@ -201,43 +216,49 @@ window.openDoc=async(i,type)=>{let b=bookings[i],key=type==="Invoice"?"invoice":
 if($("pdfBtn")) $("pdfBtn").onclick=()=>window.print();
 if($("imageBtn")) $("imageBtn").onclick=async()=>{
   if(!currentDoc)return;
-  const doc=$("document").querySelector(".doc");
+  const source=$("document");
+  if(!source){alert("Document is not ready.");return}
   try{
-    // Clone only the finished document, including the embedded blue signature.
-    const clone=doc.cloneNode(true);
+    const clone=source.cloneNode(true);
+    clone.classList.remove("hidden");
+    clone.style.cssText="display:block;width:758px;max-width:758px;margin:0;padding:24px;box-sizing:border-box;background:#fff;box-shadow:none;border:none;";
     const styles=[...document.querySelectorAll("style")].map(x=>x.textContent).join("\n");
-    const width=794,height=1123; // A4 aspect at 96dpi
-    const wrap=document.createElement("div");
-    wrap.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
-    wrap.style.cssText=`width:${width}px;height:${height}px;background:white;overflow:hidden;box-sizing:border-box;padding:18px`;
-    const st=document.createElement("style");st.textContent=styles+`.doc{width:758px!important;max-width:758px!important;min-height:0!important;height:auto!important;margin:0!important;padding:22px!important;box-shadow:none!important;transform-origin:top left}.no-print{display:none!important}.signature-img{display:block!important}`;
-    wrap.appendChild(st);wrap.appendChild(clone);
-    document.body.appendChild(wrap);wrap.className="export-canvas-wrap";
-    await new Promise(r=>setTimeout(r,120));
-    const actual=clone.scrollHeight;
-    if(actual>height-36){clone.style.transform=`scale(${(height-36)/actual})`;clone.style.width=`${758/((height-36)/actual)}px`;}
-    const xml=new XMLSerializer().serializeToString(wrap);
+    const width=794,height=1123;
+    const wrapper=document.createElement("div");
+    wrapper.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
+    wrapper.style.cssText=`width:${width}px;height:${height}px;background:#fff;overflow:hidden;box-sizing:border-box;padding:18px`;
+    const st=document.createElement("style");
+    st.textContent=styles+`@media print{} .no-print{display:none!important}.signature-img{display:block!important;visibility:visible!important;opacity:1!important}`;
+    wrapper.appendChild(st);wrapper.appendChild(clone);
+    const holder=document.createElement("div");holder.style.cssText="position:fixed;left:-10000px;top:0;width:794px;height:1123px;background:white;z-index:-1";holder.appendChild(wrapper);document.body.appendChild(holder);
+    await new Promise(r=>setTimeout(r,150));
+    const actual=Math.max(clone.scrollHeight,clone.getBoundingClientRect().height);
+    if(actual>height-36){
+      const scale=(height-36)/actual;
+      clone.style.transformOrigin="top left";clone.style.transform=`scale(${scale})`;clone.style.width=`${758/scale}px`;
+    }
+    const xml=new XMLSerializer().serializeToString(wrapper);
     const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%">${xml}</foreignObject></svg>`;
     const blob=new Blob([svg],{type:"image/svg+xml;charset=utf-8"});
-    const url=URL.createObjectURL(blob), img=new Image();
+    const url=URL.createObjectURL(blob),img=new Image();
     img.onload=()=>{
       const c=document.createElement("canvas");c.width=1588;c.height=2246;
-      const ctx=c.getContext("2d");ctx.scale(2,2);ctx.fillStyle="#fff";ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);
-      URL.revokeObjectURL(url);wrap.remove();
+      const ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);ctx.scale(2,2);ctx.drawImage(img,0,0,width,height);
+      URL.revokeObjectURL(url);holder.remove();
       c.toBlob(async b=>{
+        if(!b){alert("Could not create image.");return}
         const filename=(currentDoc.type||"Document").replace(/\s+/g,"_")+"_"+(currentDoc.b.guest||"Guest").replace(/[^\p{L}\p{N}_-]+/gu,"_")+".png";
         const file=new File([b],filename,{type:"image/png"});
         if(navigator.canShare&&navigator.canShare({files:[file]})){
-          try{await navigator.share({files:[file],title:"Baan Suan Taboon Homestay"});return}catch(e){}
+          try{await navigator.share({files:[file],title:"Baan Suan Taboon Homestay"});return}catch(e){if(e.name==="AbortError")return}
         }
-        const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+        const a=document.createElement("a"),u=URL.createObjectURL(b);a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);
       },"image/png",1);
     };
-    img.onerror=()=>{wrap.remove();URL.revokeObjectURL(url);alert("Image export is not supported by this browser. Please use Save PDF instead.");};
+    img.onerror=()=>{holder.remove();URL.revokeObjectURL(url);alert("This browser could not create the image. Please use Save PDF / Print.");};
     img.src=url;
   }catch(err){alert("Could not create image: "+err.message)}
 };
-$("closeDoc").onclick=()=>show("bookings");
 $("shareBtn").onclick=async()=>{if(!currentDoc)return;let b=currentDoc.b,text=`Baan Suan Taboon Homestay\n${currentDoc.type}\nGuest: ${b.guest}\nRoom ${b.room} — ${b.roomName}\n${b.cin} to ${b.cout}\nTotal: ${money(b.total)}\nPaid: ${money(b.paid)}\nBalance: ${money(b.total-b.paid)}`;if(navigator.share){try{await navigator.share({title:"Baan Suan Taboon Homestay",text})}catch(e){}}else{await navigator.clipboard.writeText(text);alert("Details copied.")}};
 function renderCalendar(){let y=calDate.getFullYear(),m=calDate.getMonth(),days=new Date(y,m+1,0).getDate();$("monthTitle").textContent=calDate.toLocaleDateString("en-US",{month:"long",year:"numeric"});let h="<tr><th>Room</th>";for(let d=1;d<=days;d++){let dt=new Date(y,m,d),today=new Date(),cl=dt.toDateString()===today.toDateString()?'today':'';h+=`<th class="${cl}">${d}</th>`}h+="</tr>";for(let r=1;r<=4;r++){h+=`<tr><td>Room ${r}<br><span class="muted">${rooms[r].name}</span></td>`;for(let d=1;d<=days;d++){let ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`,b=bookings.find(x=>x.room==r&&ds>=x.cin&&ds<x.cout);h+=`<td class="${b?'busy':''}" title="${b?safe(b.guest):''}">${b?'●':''}</td>`}h+="</tr>"}$("cal").innerHTML=h}
 $("prevMonth").onclick=()=>{calDate.setMonth(calDate.getMonth()-1);renderCalendar()};$("nextMonth").onclick=()=>{calDate.setMonth(calDate.getMonth()+1);renderCalendar()};
