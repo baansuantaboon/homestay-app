@@ -1,16 +1,14 @@
-Baan Suan Taboon Homestay Manager — Version 2
+Baan Suan Taboon Homestay Manager — Version 3 (Firebase Cloud Sync)
 
-Added:
-- Four-room monthly reservation calendar
-- Edit/delete bookings
-- Bilingual English/Thai customer documents
-- Booking Confirmation, Invoice and Receipt
-- Print / Save PDF
-- Share booking/document details
-- Local backup export and restore
-- Installable PWA manifest and app icons
-- Offline caching
+Upload all files in this folder to the existing GitHub repository root, replacing older files.
 
-Important:
-Bookings remain local to each browser/device. They are NOT uploaded to GitHub.
-Export backups regularly. This version does not yet sync multiple devices.
+Changes:
+- Firebase Email/Password sign-in
+- Firestore cloud synchronization across devices
+- Shared homestay login
+- Real-time booking/calendar updates
+- JSON export/import remains available
+- Version 2 local bookings can be migrated after first sign-in
+- Receipt counter starts at RCV0002 to avoid collision with the existing RCV0001 receipt
+
+Do not put guest data or passwords in GitHub files. The Firebase web configuration is intentionally client-side; Firestore access is protected by Authentication + Firestore rules.

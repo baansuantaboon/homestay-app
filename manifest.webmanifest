@@ -1,6 +1,6 @@
 {
   "name": "Baan Suan Taboon Homestay Manager",
-  "short_name": "Taboon Homestay",
+  "short_name": "Taboon Manager",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
