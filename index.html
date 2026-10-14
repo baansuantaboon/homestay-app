@@ -1,0 +1,45 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Baan Suan Taboon Homestay</title><link rel="manifest" href="manifest.webmanifest">
+<style>
+body{font-family:Arial,sans-serif;margin:0;background:#f5f2e9;color:#222}header{background:#365b43;color:#fff;padding:16px}main{max-width:850px;margin:auto;padding:14px}
+.card{background:#fff;border:1px solid #ddd;border-radius:14px;padding:15px;margin-bottom:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:bold;margin-bottom:5px}input,select,textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:9px;font-size:16px}
+button{padding:11px 14px;border:1px solid #ccc;border-radius:10px;background:#fff;font-size:15px}.primary{background:#365b43;color:#fff}.hidden{display:none}.muted{color:#666;font-size:13px}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.booking{padding:12px 0;border-top:1px solid #ddd}.doc{background:#fff;padding:20px}.head{display:flex;justify-content:space-between;border-bottom:2px solid #365b43;padding-bottom:12px}
+table{width:100%;border-collapse:collapse;margin-top:16px}th,td{padding:9px;border-bottom:1px solid #ddd;text-align:left}.num{text-align:right}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.head{display:block}}
+@media print{body *{visibility:hidden}.doc,.doc *{visibility:visible}.doc{position:absolute;left:0;top:0;width:100%;box-sizing:border-box;padding:15mm}.no-print{display:none!important}}
+</style></head><body>
+<header><b>Baan Suan Taboon Homestay</b><div style="font-size:12px">Booking & Guest Documents</div></header><main>
+<div class="actions no-print"><button class="primary" onclick="tab('new')">New Booking</button><button onclick="tab('list')">Bookings</button><button onclick="tab('rooms')">Rooms</button></div>
+<section id="new"><form id="f" class="card grid">
+<div class="full"><b>New booking</b><div class="muted">Enter the stay once. Phone is optional.</div></div>
+<div class="full"><label>Guest name *</label><input id="guest" required></div>
+<div><label>Phone</label><input id="phone"></div><div><label>Guests</label><input id="guests" type="number" min="1" max="4" value="2"></div>
+<div class="full"><label>Room</label><select id="room"><option value="1">Room 1 — Double Room</option><option value="2">Room 2 — Family Room</option><option value="3">Room 3 — Spa Room</option><option value="4">Room 4 — Big Family Room</option></select></div>
+<div><label>Check-in</label><input id="cin" type="date" required></div><div><label>Check-out</label><input id="cout" type="date" required></div>
+<div><label>Amount paid (฿)</label><input id="paid" type="number" min="0" value="0"></div><div><label>Payment</label><select id="method"><option>Not paid</option><option>Cash</option><option>Bank transfer</option><option>PromptPay</option></select></div>
+<div class="full"><label><input id="breakfast" type="checkbox" checked style="width:auto"> Breakfast included</label></div>
+<div class="full"><label>Notes</label><textarea id="notes"></textarea></div><div class="full card" id="summary"></div>
+<div class="full"><button class="primary" type="submit">Save Booking</button></div></form></section>
+<section id="list" class="hidden"><div class="card"><b>Saved bookings</b><div id="bookingList"></div></div></section>
+<section id="rooms" class="hidden"><div class="card"><b>Rooms & rates</b><p>Room 1 — Double Room: ฿650/night · max 2</p><p>Room 2 — Family Room: ฿850/night · max 3</p><p>Room 3 — Spa Room: ฿650/night · max 2</p><p>Room 4 — Big Family Room: ฿1,000 for 1–2 guests; ฿1,200 for 3–4 guests · max 4</p><p class="muted">Check-in 14:00 · Check-out 12:00</p></div></section>
+<section id="document" class="hidden doc"><div class="head"><div><h2 style="margin:0">Baan Suan Taboon Homestay</h2><div class="muted">171 Moo 12, Nang Lae, Mueang Chiang Rai, Chiang Rai 57100, Thailand<br>081 595 9759 · critentstay@gmail.com</div></div><div><h2 id="dt" style="margin:0"></h2><div id="dn"></div></div></div>
+<p><b>Guest:</b> <span id="dg"></span><br><span id="dp"></span></p><table><thead><tr><th>Stay details</th><th class="num">Rate</th><th class="num">Nights</th><th class="num">Amount</th></tr></thead><tbody><tr><td id="ds"></td><td id="dr" class="num"></td><td id="dnight" class="num"></td><td id="da" class="num"></td></tr></tbody></table>
+<div style="text-align:right;margin-top:18px">Total: <b id="dtotal"></b><br>Paid: <span id="dpaid"></span><br><b>Balance due: <span id="dbal"></span></b></div><p class="muted">Thank you for choosing Baan Suan Taboon Homestay.</p>
+<div class="actions no-print"><button class="primary" onclick="print()">Print / Save PDF</button><button onclick="tab('list')">Back</button></div></section>
+</main><script>
+const R={1:{n:"Double Room",r:650,m:2},2:{n:"Family Room",r:850,m:3},3:{n:"Spa Room",r:650,m:2},4:{n:"Big Family Room",r:1200,m:4}},$=x=>document.getElementById(x),M=n=>"฿"+Number(n).toLocaleString("en-US");
+let B=JSON.parse(localStorage.getItem("bst")||"[]"),C=JSON.parse(localStorage.getItem("bstc")||'{"i":2,"r":1,"b":1}');
+function N(){let a=$("cin").value.split("-").map(Number),b=$("cout").value.split("-").map(Number);if(a.length<3||b.length<3)return 0;return Math.round((Date.UTC(b[0],b[1]-1,b[2])-Date.UTC(a[0],a[1]-1,a[2]))/86400000)}
+function rate(){return $("room").value==="4"?(+$("guests").value<=2?1000:1200):R[$("room").value].r}
+function upd(){let n=Math.max(0,N()),r=rate();$("summary").innerHTML="<b>"+n+" night(s)</b> × "+M(r)+" = <b>"+M(n*r)+"</b>"}
+function tab(x){["new","list","rooms","document"].forEach(y=>$(y).classList.add("hidden"));$(x).classList.remove("hidden");if(x==="list")list()}
+window.tab=tab;
+["room","guests","cin","cout"].forEach(x=>$(x).addEventListener("input",upd));
+$("f").onsubmit=e=>{e.preventDefault();let id=$("room").value,r=R[id],g=+$("guests").value,n=N();if(n<1)return alert("Check-out must be after check-in.");if(g<1||g>r.m)return alert("Maximum "+r.m+" guests for this room.");let rt=rate(),tot=n*rt,p=Math.min(tot,Math.max(0,+$("paid").value||0));B.push({guest:$("guest").value.trim(),phone:$("phone").value.trim(),room:id,rn:r.n,cin:$("cin").value,cout:$("cout").value,n:n,rate:rt,total:tot,paid:p,bf:$("breakfast").checked});localStorage.setItem("bst",JSON.stringify(B));tab("list")};
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function list(){$("bookingList").innerHTML=B.length?B.map((b,i)=>'<div class="booking"><b>'+esc(b.guest)+'</b><div class="muted">Room '+b.room+' — '+esc(b.rn)+' · '+b.cin+' → '+b.cout+'</div><div>'+M(b.total)+' · Balance '+M(b.total-b.paid)+'</div><div class="actions"><button onclick="doc('+i+',\'Booking Confirmation\')">Confirmation</button><button onclick="doc('+i+',\'Invoice\')">Invoice</button><button onclick="doc('+i+',\'Receipt\')" '+(b.paid<=0?'disabled':'')+'>Receipt</button></div></div>').join(""):'<p class="muted">No bookings yet.</p>'}
+window.doc=(i,t)=>{let b=B[i],k=t==="Invoice"?"i":t==="Receipt"?"r":"b",p=t==="Invoice"?"INV":t==="Receipt"?"RCV":"BK";if(!b[k]){b[k]=C[k]++;localStorage.setItem("bstc",JSON.stringify(C));localStorage.setItem("bst",JSON.stringify(B))}$("dt").textContent=t.toUpperCase();$("dn").textContent="No. "+p+String(b[k]).padStart(4,"0");$("dg").textContent=b.guest;$("dp").textContent=b.phone?"Phone: "+b.phone:"";$("ds").innerHTML="<b>Room "+b.room+" — "+esc(b.rn)+"</b><br>Check-in: "+b.cin+" at 14:00<br>Check-out: "+b.cout+" at 12:00<br>"+(b.bf?"Breakfast included":"Breakfast not included");$("dr").textContent=M(b.rate);$("dnight").textContent=b.n;$("da").textContent=M(b.total);$("dtotal").textContent=M(b.total);$("dpaid").textContent=M(b.paid);$("dbal").textContent=M(b.total-b.paid);tab("document")};
+let d=new Date(),t=new Date(d);t.setDate(d.getDate()+1);let iso=x=>x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");$("cin").value=iso(d);$("cout").value=iso(t);upd();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+</script></body></html>
