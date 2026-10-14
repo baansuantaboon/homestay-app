@@ -1,13 +1,11 @@
-Baan Suan Taboon Homestay Manager — Version 8
+Baan Suan Taboon Homestay Manager — Version 9
 
-Fixes and upgrades:
-- Each room in one reservation now has its OWN check-in date and check-out date.
-- Nights and room amount are calculated independently for each room.
-- One customer can therefore book several rooms for different date ranges.
-- Calendar occupancy uses each room's own dates.
-- Confirmation, invoice and receipt list each room's check-in, check-out, nights, rate and amount.
-- Proprietor signature is embedded directly into index.html to prevent it disappearing because of image caching/path issues.
-- Existing older bookings remain supported.
-- Firebase cloud sync is preserved.
+Changes:
+- Signature rebuilt from the proprietor's original signature and rendered as blue handwriting.
+- Signature embedded directly in index.html so it does not depend on a separate file loading during PDF printing.
+- A4 print stylesheet compressed to keep customer documents on one A4 page.
+- Added Save as Image option (PNG) alongside Save PDF / Print.
+- Multiple rooms with independent dates, company/tax fields, discounts and Firebase cloud sync remain intact.
 
-Upload all files to the existing GitHub repository, replacing the current site files.
+On Android, Save PDF / Print opens the system print preview. Choose Save as PDF.
+Save as Image creates a PNG and uses Android's share/save sheet when supported.
