@@ -1,15 +1,16 @@
-Baan Suan Taboon Homestay Manager v1
+Baan Suan Taboon Homestay Manager — Version 2
 
-This is the first standalone prototype.
-
-Features:
-- Four preset rooms and rates
-- Automatic nights and room totals
-- Room 4 rate changes automatically by guest count
-- Optional guest phone number
+Added:
+- Four-room monthly reservation calendar
+- Edit/delete bookings
+- Bilingual English/Thai customer documents
 - Booking Confirmation, Invoice and Receipt
-- Print / Save as PDF
-- Bookings stored locally on the device/browser
+- Print / Save PDF
+- Share booking/document details
+- Local backup export and restore
+- Installable PWA manifest and app icons
+- Offline caching
 
-Important: clearing browser/site data can delete locally stored bookings.
-For Android installation as a PWA, host these files together on an HTTPS website.
+Important:
+Bookings remain local to each browser/device. They are NOT uploaded to GitHub.
+Export backups regularly. This version does not yet sync multiple devices.
