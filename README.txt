@@ -1,11 +1,9 @@
-Baan Suan Taboon Homestay Manager — Version 9
+Baan Suan Taboon Homestay Manager — Version 9.1
 
-Changes:
-- Signature rebuilt from the proprietor's original signature and rendered as blue handwriting.
-- Signature embedded directly in index.html so it does not depend on a separate file loading during PDF printing.
-- A4 print stylesheet compressed to keep customer documents on one A4 page.
-- Added Save as Image option (PNG) alongside Save PDF / Print.
-- Multiple rooms with independent dates, company/tax fields, discounts and Firebase cloud sync remain intact.
-
-On Android, Save PDF / Print opens the system print preview. Choose Save as PDF.
-Save as Image creates a PNG and uses Android's share/save sheet when supported.
+Fix:
+- Corrected the Version 9 sign-in failure.
+- The Version 9 JavaScript expected new PDF/Image button IDs while the page still used
+  the old print button ID. This caused JavaScript to stop before attaching the login handler.
+- Added defensive checks so optional export buttons cannot break login initialization.
+- Retains blue signature, one-page A4 printing, PNG export, per-room dates, discounts,
+  billing/tax fields and Firebase cloud sync.

@@ -71,7 +71,7 @@ label{font-size:13px;font-weight:bold;display:block;margin:0 0 5px}input,select,
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head><body>
-<header><div class="topline"><div class="appbrand"><img src="logo.jpg" alt="Baan Suan Taboon Homestay logo"><div><strong>Baan Suan Taboon Homestay</strong><div style="font-size:12px">Booking Manager · Version 9 · Cloud Sync</div><div id="cloudStatus" class="status warn">Not signed in</div></div></div><button id="signOutBtn" class="hidden">Sign out</button></div></header>
+<header><div class="topline"><div class="appbrand"><img src="logo.jpg" alt="Baan Suan Taboon Homestay logo"><div><strong>Baan Suan Taboon Homestay</strong><div style="font-size:12px">Booking Manager · Version 9.1 · Cloud Sync</div><div id="cloudStatus" class="status warn">Not signed in</div></div></div><button id="signOutBtn" class="hidden">Sign out</button></div></header>
 <main>
 <section id="loginScreen" class="card">
 <h2 style="margin-top:0">Homestay sign in</h2>
@@ -142,7 +142,7 @@ label{font-size:13px;font-weight:bold;display:block;margin:0 0 5px}input,select,
   <div class="doc-thanks">Thank you for choosing Baan Suan Taboon Homestay.<br>ขอบคุณที่เลือกพักกับ Baan Suan Taboon Homestay</div>
   <div class="sig">ผู้ประกอบการ / Proprietor<br><b>Baan Suan Taboon Homestay</b></div>
 </div>
-<div class="actions no-print doc-actions"><button class="primary" id="printBtn">Print / Save PDF</button><button id="shareBtn">Share Details</button><button id="closeDoc">Back</button></div>
+<div class="actions no-print doc-actions"><button class="primary" id="pdfBtn">Save PDF / Print</button><button id="imageBtn">Save as Image</button><button id="shareBtn">Share Details</button><button id="closeDoc">Back</button></div>
 </section>
 </div>
 </main>
@@ -198,8 +198,8 @@ window.editBooking=i=>{let b=bookings[i];$("guest").value=b.guest||"";$("phone")
 window.deleteBooking=async i=>{if(confirm("Delete this booking from all synced devices?")){try{await db.collection("bookings").doc(String(bookings[i].id)).delete()}catch(err){alert("Could not delete: "+err.message)}}};
 window.openDoc=async(i,type)=>{let b=bookings[i],key=type==="Invoice"?"invoice":type==="Receipt"?"receipt":"booking",prefix=type==="Invoice"?"INV":type==="Receipt"?"RCV":"BK";if(!b[key+"No"]){b[key+"No"]=counters[key]++;try{await saveBooking(b);await saveCounters()}catch(err){alert("Could not reserve document number: "+err.message);return}}currentDoc={b,type};let titles={"Booking Confirmation":"BOOKING CONFIRMATION","Confirmation":"BOOKING CONFIRMATION","Invoice":"INVOICE / ใบแจ้งหนี้","Receipt":"RECEIPT / ใบเสร็จรับเงิน"};$("docTitle").textContent=titles[type]||type.toUpperCase();$("docNo").textContent="No. "+prefix+String(b[key+"No"]).padStart(4,"0");$("docDate").textContent="Date / วันที่: "+new Date().toLocaleDateString("en-GB");$("docStatus").textContent=(b.total-b.paid)<=0?"PAID / ชำระแล้ว":"UNPAID / ยังไม่ชำระ";$("docStatus").className="doc-status "+((b.total-b.paid)<=0?"paid":"");$("dGuest").textContent=b.guest;$("dPhone").textContent=b.phone?"Phone / โทรศัพท์: "+b.phone:"";let bill=[];if(b.company)bill.push(b.company);if(b.billingAddress)bill.push(b.billingAddress);if(b.taxId)bill.push("Tax ID / เลขประจำตัวผู้เสียภาษี: "+b.taxId+(b.branch?" · Branch / สาขา: "+b.branch:""));else if(b.branch)bill.push("Branch / สาขา: "+b.branch);$("dBilling").textContent=bill.join("\n");$("dBilling").classList.toggle("hidden",!bill.length);$("dCin").textContent=`${b.cin} · after 14:00`;$("dCout").textContent=`${b.cout} · before 12:00`;$("dBreakfast").textContent=b.breakfast?"Included / รวมอาหารเช้า":"Not included / ไม่รวมอาหารเช้า";let items=legacyItems(b),guestTotal=items.reduce((a,x)=>a+Number(x.guests||0),0);$("dGuests").textContent=guestTotal;let n=Number(b.nights||nights(b.cin,b.cout));$("dRoomRows").innerHTML=items.map(x=>`<tr><td>Room ${safe(x.room)} — ${safe(x.roomName)}</td><td>${x.guests}</td><td>${x.cin||b.cin}</td><td>${x.cout||b.cout}</td><td>${money(x.rate)}</td><td>${x.nights||nights(x.cin||b.cin,x.cout||b.cout)}</td><td>${money((x.nights||nights(x.cin||b.cin,x.cout||b.cout))*x.rate)}</td></tr>`).join("");let subtotal=Number(b.subtotal??items.reduce((a,x)=>a+(x.nights||nights(x.cin||b.cin,x.cout||b.cout))*Number(x.rate),0)),discount=Number(b.discount??Math.max(0,subtotal-Number(b.total)));$("dSubtotal").textContent=money(subtotal);$("dDiscount").textContent="−"+money(discount);$("dDiscountLine").classList.toggle("hidden",discount<=0);$("dTotal").textContent=money(b.total);$("dPaid").textContent=money(b.paid);$("dBalance").textContent=money(b.total-b.paid);$("dMethod").textContent=b.method&&b.method!=="Not paid"?"Payment / วิธีชำระ: "+b.method:"";if(b.notes){$("dNotes").textContent="Remarks / หมายเหตุ: "+b.notes;$("dNotes").classList.remove("hidden")}else{$("dNotes").textContent="";$("dNotes").classList.add("hidden")}show("document");scrollTo(0,0)};
 
-$("pdfBtn").onclick=()=>window.print();
-$("imageBtn").onclick=async()=>{
+if($("pdfBtn")) $("pdfBtn").onclick=()=>window.print();
+if($("imageBtn")) $("imageBtn").onclick=async()=>{
   if(!currentDoc)return;
   const doc=$("document").querySelector(".doc");
   try{
