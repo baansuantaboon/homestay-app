@@ -1,14 +1,7 @@
-Baan Suan Taboon Homestay Manager — Version 3 (Firebase Cloud Sync)
+Baan Suan Taboon Homestay Manager — Version 4
 
-Upload all files in this folder to the existing GitHub repository root, replacing older files.
+Cloud-sync booking manager using Firebase Authentication and Cloud Firestore.
 
-Changes:
-- Firebase Email/Password sign-in
-- Firestore cloud synchronization across devices
-- Shared homestay login
-- Real-time booking/calendar updates
-- JSON export/import remains available
-- Version 2 local bookings can be migrated after first sign-in
-- Receipt counter starts at RCV0002 to avoid collision with the existing RCV0001 receipt
+Version 4 improves the customer-facing Booking Confirmation, Invoice and Receipt with a modern bilingual A4 layout while keeping the Version 3 Firebase cloud database and login.
 
-Do not put guest data or passwords in GitHub files. The Firebase web configuration is intentionally client-side; Firestore access is protected by Authentication + Firestore rules.
+Upload all files to the existing GitHub repository, replacing files with the same names.
